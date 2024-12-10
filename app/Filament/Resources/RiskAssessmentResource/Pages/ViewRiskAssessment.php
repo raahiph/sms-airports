@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\RiskAssessmentResource\Pages;
 
 use App\Filament\Resources\RiskAssessmentResource;
+use App\Services\RiskAssessmentPdfService;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions;
 
@@ -17,8 +18,10 @@ class ViewRiskAssessment extends ViewRecord
             Actions\Action::make('download')
                 ->label('Download PDF')
                 ->icon('heroicon-o-document-arrow-down')
+                ->color('success')
                 ->action(function () {
-                    // PDF generation logic can be added here
+                    // $pdfService = app(RiskAssessmentPdfService::class);
+                    // return $pdfService->generatePdf($this->record);
                 }),
             Actions\Action::make('changeStatus')
                 ->label('Change Status')

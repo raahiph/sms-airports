@@ -41,45 +41,50 @@ class HazardReport extends Model
 
     public function getRiskLevelAttribute(): string
     {
+        if (!$this->risk_rating) {
+            return 'undefined';
+        }
         return static::getRiskLevel($this->risk_rating);
     }
 
-    protected static array $riskColors = [
-        // Red zone combinations
-        '5A' => '#FF0000', // High risk
-        '5B' => '#FF0000',
-        '5C' => '#FF0000',
-        '4A' => '#FF0000',
-        '4B' => '#FF0000',
-        '3A' => '#FF0000',
-        
-        // Yellow zone combinations
-        '5D' => '#FFD700',
-        '5E' => '#FFD700',
-        '4C' => '#FFD700',
-        '4D' => '#FFD700',
-        '4E' => '#FFD700',
-        '3B' => '#FFD700',
-        '3C' => '#FFD700',
-        '3D' => '#FFD700',
-        '2A' => '#FFD700',
-        '2B' => '#FFD700',
-        '2C' => '#FFD700',
-        
-        // Green zone combinations
-        '3E' => '#008000',
-        '2D' => '#008000',
-        '2E' => '#008000',
-        '1A' => '#008000',
-        '1B' => '#008000',
-        '1C' => '#008000',
-        '1D' => '#008000',
-        '1E' => '#008000',
-    ];
-
-    public static function getRiskColor(string $riskRating): string
+    public static function getRiskLevel(?string $riskRating): string
     {
-        return self::$riskColors[$riskRating] ?? '#808080';
+        if (!$riskRating) {
+            return 'undefined';
+        }
+
+        // High Risk (Red) combinations
+        $highRisk = ['5A', '5B', '5C', '4A', '4B', '3A'];
+        
+        // Medium Risk (Yellow) combinations
+        $mediumRisk = ['5D', '5E', '4C', '4D', '4E', '3B', '3C', '3D', '2A', '2B', '2C'];
+        
+        // Low Risk (Green) combinations
+        $lowRisk = ['3E', '2D', '2E', '1A', '1B', '1C', '1D', '1E'];
+
+        if (in_array($riskRating, $highRisk)) {
+            return 'high';
+        } elseif (in_array($riskRating, $mediumRisk)) {
+            return 'medium';
+        } elseif (in_array($riskRating, $lowRisk)) {
+            return 'low';
+        }
+
+        return 'undefined';
+    }
+
+        public static function getRiskColor(?string $riskRating): string
+    {
+        if (!$riskRating) {
+            return '#808080'; // Gray for undefined
+        }
+
+        return match (self::getRiskLevel($riskRating)) {
+            'high' => '#FF0000',    // Red
+            'medium' => '#FFD700',  // Yellow
+            'low' => '#008000',     // Green
+            default => '#808080'    // Gray
+        };
     }
 
     protected $casts = [

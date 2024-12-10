@@ -16,7 +16,7 @@ class BirdEntryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 
-    protected static ?string $navigationGroup = 'Wild Life Management';
+    protected static ?string $navigationGroup = 'Wildlife Management';
     
     protected static ?int $navigationSort = 1;
 
