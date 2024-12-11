@@ -10,13 +10,22 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use App\Traits\HasUserManagementAccess;
 
 class RoleResource extends Resource
 {
+    use HasUserManagementAccess;
+
     protected static ?string $model = Role::class;
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
     protected static ?string $navigationGroup = 'User Management';
     protected static ?int $navigationSort = 2;
+
+    protected static function adminQueryRestrictions(Builder $query): Builder
+    {
+        // Admins can only see and manage User role
+        return $query->where('name', 'User');
+    }
 
     public static function form(Form $form): Form
     {
@@ -25,13 +34,15 @@ class RoleResource extends Resource
                 Forms\Components\Card::make()
                     ->schema([
                         Forms\Components\TextInput::make('name')
-                            ->unique(ignoreRecord: true)
-                            ->required(),
-                        Forms\Components\Select::make('permissions')
-                            ->multiple()
-                            ->relationship('permissions', 'name')
-                            ->preload()
-                            ->searchable(),
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->disabled(fn () => !auth()->user()->hasRole('Super Admin')),
+                    
+                Forms\Components\Select::make('permissions')
+                    ->multiple()
+                    ->relationship('permissions', 'name')
+                    ->preload()
+                    ->visible(fn () => auth()->user()->hasRole('Super Admin')),
                     ])
             ]);
     }
@@ -54,12 +65,15 @@ class RoleResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn () => auth()->user()->hasRole('Super Admin')),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn () => auth()->user()->hasRole('Super Admin')),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()->hasRole('Super Admin')),
                 ]),
             ]);
     }

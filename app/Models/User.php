@@ -18,6 +18,10 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'designation',
+        'department',
+        'airport',
+        'contact_number',
     ];
 
     protected $hidden = [
@@ -32,6 +36,6 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true; // For now, allow all users to access the panel
+        return $this->hasAnyRole(['Super Admin', 'Admin', 'User']); // Allow all roles to access
     }
 }

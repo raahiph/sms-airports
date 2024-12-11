@@ -11,60 +11,76 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create permissions
+        // Reset cached roles and permissions
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // Define permissions
         $permissions = [
+            // User management
             'view_users',
             'create_users',
             'edit_users',
             'delete_users',
-            'view_roles',
-            'create_roles',
-            'edit_roles',
-            'delete_roles',
-            'view_hazard_reports',
-            'create_hazard_reports',
-            'edit_hazard_reports',
-            'delete_hazard_reports',
-            'view_bird_entries',
-            'create_bird_entries',
-            'edit_bird_entries',
-            'delete_bird_entries',
+            
+            // Hazard reports
+            'view_hazards',
+            'create_hazards',
+            'edit_hazards',
+            'delete_hazards',
+            
+            // Bird entries
+            'view_birds',
+            'create_birds',
+            'edit_birds',
+            'delete_birds',
         ];
 
+        // Create permissions if they don't exist
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Create roles and assign permissions
-        $superAdmin = Role::create(['name' => 'Super Admin']);
-        $superAdmin->givePermissionTo(Permission::all());
+        // Create roles if they don't exist and sync permissions
+        $roles = [
+            'Super Admin' => $permissions,
+            'Admin' => [
+                'view_users',
+                'view_hazards',
+                'create_hazards',
+                'edit_hazards',
+                'view_birds',
+                'create_birds',
+                'edit_birds',
+            ],
+            'User' => [
+                'view_hazards',
+                'create_hazards',
+                'view_birds',
+                'create_birds',
+            ],
+        ];
 
-        $admin = Role::create(['name' => 'Admin']);
-        $admin->givePermissionTo([
-            'view_users',
-            'view_roles',
-            'view_hazard_reports',
-            'create_hazard_reports',
-            'edit_hazard_reports',
-            'view_bird_entries',
-            'create_bird_entries',
-            'edit_bird_entries',
-        ]);
+        foreach ($roles as $roleName => $rolePermissions) {
+            $role = Role::firstOrCreate(['name' => $roleName]);
+            $role->syncPermissions($rolePermissions);
+        }
 
-        $user = Role::create(['name' => 'User']);
-        $user->givePermissionTo([
-            'view_hazard_reports',
-            'create_hazard_reports',
-            'view_bird_entries',
-            'create_bird_entries',
-        ]);
+        // Create super admin user if it doesn't exist
+        $adminUser = User::firstOrCreate(
+            ['email' => 'admin@admin.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => bcrypt('password'),
+                'designation' => 'System Administrator',
+                'department' => 'IT',
+                'airport' => 'HDQ',
+                'contact_number' => '1234567890'
+            ]
+        );
 
-        // Create a super admin user
-        $superAdminUser = User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@example.com',
-            'password' => bcrypt('password'),
-        ]);
-        $superAdminUser->assignRole('Super Admin');
+        // Assign super admin role
+        if (!$adminUser->hasRole('Super Admin')) {
+            $adminUser->assignRole('Super Admin');
+        }
     }
 }
