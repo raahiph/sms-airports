@@ -6,6 +6,8 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\Models\User;
+use App\Services\ResourcePermissionService;
+use Illuminate\Support\Str;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -14,52 +16,38 @@ class RolePermissionSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Define permissions
-        $permissions = [
-            // User management
-            'view_users',
-            'create_users',
-            'edit_users',
-            'delete_users',
-            
-            // Hazard reports
-            'view_hazards',
-            'create_hazards',
-            'edit_hazards',
-            'delete_hazards',
-            
-            // Bird entries
-            'view_birds',
-            'create_birds',
-            'edit_birds',
-            'delete_birds',
-        ];
+        // Get all permissions from resources
+        $permissionService = new ResourcePermissionService();
+        $permissions = $permissionService->getResourcePermissions();
 
-        // Create permissions if they don't exist
+        // Create permissions
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Create roles if they don't exist and sync permissions
+        // Define roles and their permissions
         $roles = [
-            'Super Admin' => $permissions,
-            'Admin' => [
-                'view_users',
-                'view_hazards',
-                'create_hazards',
-                'edit_hazards',
-                'view_birds',
-                'create_birds',
-                'edit_birds',
-            ],
-            'User' => [
-                'view_hazards',
-                'create_hazards',
-                'view_birds',
-                'create_birds',
-            ],
+            'Super Admin' => $permissions, // Super Admin gets all permissions
+            'Admin' => array_filter($permissions, function($permission) {
+                // Admins can't manage roles and some sensitive operations
+                return !Str::contains($permission, [
+                    'roles',
+                    'force_delete',
+                    'restore',
+                ]);
+            }),
+            'User' => array_filter($permissions, function($permission) {
+                // Users can only view and create certain resources
+                return Str::startsWith($permission, ['view_', 'create_']) 
+                    && !Str::contains($permission, [
+                        'roles',
+                        'permissions',
+                        'users',
+                    ]);
+            }),
         ];
 
+        // Create roles and assign permissions
         foreach ($roles as $roleName => $rolePermissions) {
             $role = Role::firstOrCreate(['name' => $roleName]);
             $role->syncPermissions($rolePermissions);

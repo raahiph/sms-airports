@@ -49,7 +49,7 @@ class AdminPanelProvider extends PanelProvider
                 AdvancedSafetyInsightsWidget::class,
                 BirdEntriesStatsWidget::class,
                 HazardReportsOverviewWidget::class,
-                RiskAssessmentChartWidget::class,
+                // RiskAssessmentChartWidget::class,
                 RecentHazardsTable::class,
                 // RecentHazardsWidget::class,
                 

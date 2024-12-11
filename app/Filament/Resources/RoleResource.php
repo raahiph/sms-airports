@@ -11,6 +11,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use App\Traits\HasUserManagementAccess;
+use Spatie\Permission\Models\Permission;
 
 class RoleResource extends Resource
 {
@@ -21,29 +22,94 @@ class RoleResource extends Resource
     protected static ?string $navigationGroup = 'User Management';
     protected static ?int $navigationSort = 2;
 
-    protected static function adminQueryRestrictions(Builder $query): Builder
-    {
-        // Admins can only see and manage User role
-        return $query->where('name', 'User');
-    }
-
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Card::make()
+                Forms\Components\Section::make('Role Details')
                     ->schema([
                         Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->disabled(fn () => !auth()->user()->hasRole('Super Admin')),
-                    
-                Forms\Components\Select::make('permissions')
-                    ->multiple()
-                    ->relationship('permissions', 'name')
-                    ->preload()
-                    ->visible(fn () => auth()->user()->hasRole('Super Admin')),
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->disabled(fn ($record) => 
+                                !auth()->user()->hasRole('Super Admin') || 
+                                ($record && in_array($record->name, ['Super Admin', 'Admin']))
+                            ),
+                    ]),
+
+                Forms\Components\Section::make('Permissions')
+                    ->schema([
+                        Forms\Components\Tabs::make('Permissions')
+                            ->tabs([
+                                // User Management Tab
+                                Forms\Components\Tabs\Tab::make('User Management')
+                                    ->schema([
+                                        Forms\Components\CheckboxList::make('permissions')
+                                            ->relationship('permissions', 'name')
+                                            ->options(function () {
+                                                return Permission::where('name', 'like', '%user%')
+                                                    ->orWhere('name', 'like', '%role%')
+                                                    ->pluck('name', 'id');
+                                            })
+                                            ->columns(2)
+                                            ->gridDirection('row')
+                                            ->searchable()
+                                    ]),
+
+                                // Safety Management Tab
+                                Forms\Components\Tabs\Tab::make('Safety Management')
+                                    ->schema([
+                                        Forms\Components\CheckboxList::make('permissions')
+                                            ->relationship('permissions', 'name')
+                                            ->options(function () {
+                                                return Permission::where('name', 'like', '%hazard%')
+                                                    ->orWhere('name', 'like', '%risk%')
+                                                    ->orWhere('name', 'like', '%occurrence%')
+                                                    ->pluck('name', 'id');
+                                            })
+                                            ->columns(2)
+                                            ->gridDirection('row')
+                                            ->searchable()
+                                    ]),
+
+                                // Wildlife Management Tab
+                                Forms\Components\Tabs\Tab::make('Wildlife Management')
+                                    ->schema([
+                                        Forms\Components\CheckboxList::make('permissions')
+                                            ->relationship('permissions', 'name')
+                                            ->options(function () {
+                                                return Permission::where('name', 'like', '%bird%')
+                                                    ->orWhere('name', 'like', '%wildlife%')
+                                                    ->pluck('name', 'id');
+                                            })
+                                            ->columns(2)
+                                            ->gridDirection('row')
+                                            ->searchable()
+                                    ]),
+
+                                // Other Permissions Tab
+                                Forms\Components\Tabs\Tab::make('Other Permissions')
+                                    ->schema([
+                                        Forms\Components\CheckboxList::make('permissions')
+                                            ->relationship('permissions', 'name')
+                                            ->options(function () {
+                                                return Permission::where('name', 'not like', '%user%')
+                                                    ->where('name', 'not like', '%role%')
+                                                    ->where('name', 'not like', '%hazard%')
+                                                    ->where('name', 'not like', '%risk%')
+                                                    ->where('name', 'not like', '%occurrence%')
+                                                    ->where('name', 'not like', '%bird%')
+                                                    ->where('name', 'not like', '%wildlife%')
+                                                    ->pluck('name', 'id');
+                                            })
+                                            ->columns(2)
+                                            ->gridDirection('row')
+                                            ->searchable()
+                                    ]),
+                            ])
+                            ->columnSpanFull()
                     ])
+                    ->visible(fn () => auth()->user()->hasRole('Super Admin')),
             ]);
     }
 
@@ -55,7 +121,12 @@ class RoleResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('permissions_count')
                     ->counts('permissions')
+                    ->badge()
                     ->label('Permissions'),
+                Tables\Columns\TextColumn::make('users_count')
+                    ->counts('users')
+                    ->badge()
+                    ->label('Users'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -68,12 +139,22 @@ class RoleResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->visible(fn () => auth()->user()->hasRole('Super Admin')),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn () => auth()->user()->hasRole('Super Admin')),
+                    ->visible(fn ($record) => 
+                        auth()->user()->hasRole('Super Admin') && 
+                        !in_array($record->name, ['Super Admin', 'Admin', 'User'])
+                    ),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()->hasRole('Super Admin')),
+                        ->visible(fn () => auth()->user()->hasRole('Super Admin'))
+                        ->action(function (Collection $records) {
+                            $records->each(function ($record) {
+                                if (!in_array($record->name, ['Super Admin', 'Admin', 'User'])) {
+                                    $record->delete();
+                                }
+                            });
+                        }),
                 ]),
             ]);
     }
@@ -85,5 +166,10 @@ class RoleResource extends Resource
             'create' => Pages\CreateRole::route('/create'),
             'edit' => Pages\EditRole::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 }
