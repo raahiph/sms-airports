@@ -25,17 +25,28 @@ class OccurrenceResource extends Resource
                 Forms\Components\Section::make('Reporter Information')
                     ->schema([
                         Forms\Components\TextInput::make('reporter_name')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('reporter_mobile')
-                            ->tel()
-                            ->required(),
-                        Forms\Components\TextInput::make('reporter_email')
-                            ->email()
-                            ->required(),
-                        Forms\Components\TextInput::make('organization')
-                            ->required(),
-                    ])->columns(2),
+                        ->label('Full Name')
+                        ->default(fn () => auth()->user()->name)
+                        ->required()
+                        ->disabled(),
+                    Forms\Components\TextInput::make('reporter_mobile')
+                        ->label('Mobile')
+                        ->tel()
+                        ->default(fn () => auth()->user()->contact_number)
+                        ->required()
+                        ->disabled(),
+                    Forms\Components\TextInput::make('reporter_email')
+                        ->label('Email')
+                        ->email()
+                        ->default(fn () => auth()->user()->email)
+                        ->required()
+                        ->disabled(),
+                    Forms\Components\TextInput::make('airport')
+                        ->label('Airport')
+                        ->default(fn () => auth()->user()->airport)
+                        ->required()
+                        ->disabled(),
+                ])->columns(2),
 
                 Forms\Components\Section::make('Occurrence Details')
                     ->schema([

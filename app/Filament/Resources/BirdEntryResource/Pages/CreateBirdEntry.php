@@ -9,4 +9,11 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateBirdEntry extends CreateRecord
 {
     protected static string $resource = BirdEntryResource::class;
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['entered_by'] = auth()->user()->name;
+        
+        return $data;
+    }
 }

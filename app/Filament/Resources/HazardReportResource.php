@@ -43,22 +43,30 @@ class HazardReportResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Section::make('Reporter Information')
-                    ->schema([
-                        Forms\Components\TextInput::make('reporter_name')
-                            ->label('Full Name')
-                            ->required(),
-                        Forms\Components\TextInput::make('reporter_mobile')
-                            ->label('Mobile/Tel')
-                            ->tel()
-                            ->required(),
-                        Forms\Components\TextInput::make('reporter_email')
-                            ->label('Email')
-                            ->email()
-                            ->required(),
-                        Forms\Components\TextInput::make('organization')
-                            ->label('Organization/Airport')
-                            ->required(),
-                    ])->columns(2),
+                ->schema([
+                    Forms\Components\TextInput::make('reporter_name')
+                        ->label('Full Name')
+                        ->default(fn () => auth()->user()->name)
+                        ->required()
+                        ->disabled(),
+                    Forms\Components\TextInput::make('reporter_mobile')
+                        ->label('Mobile')
+                        ->tel()
+                        ->default(fn () => auth()->user()->contact_number)
+                        ->required()
+                        ->disabled(),
+                    Forms\Components\TextInput::make('reporter_email')
+                        ->label('Email')
+                        ->email()
+                        ->default(fn () => auth()->user()->email)
+                        ->required()
+                        ->disabled(),
+                    Forms\Components\TextInput::make('organization')
+                        ->label('Airport')
+                        ->default(fn () => auth()->user()->airport)
+                        ->required()
+                        ->disabled(),
+                ])->columns(2),
 
                 Forms\Components\Section::make('Hazard Identification')
                     ->schema([

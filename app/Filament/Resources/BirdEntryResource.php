@@ -149,9 +149,8 @@ class BirdEntryResource extends Resource
                             ->maxLength(65535)
                             ->columnSpanFull(),
 
-                        Forms\Components\TextInput::make('entered_by')
-                            ->required()
-                            ->maxLength(255),
+                            Forms\Components\Hidden::make('entered_by')
+                            ->default(fn () => auth()->user()->name),
                     ])
                     ->columns(2),
             ]);
