@@ -22,6 +22,7 @@ use App\Filament\Widgets\HazardReportsOverviewWidget;
 use App\Filament\Widgets\RiskAssessmentChartWidget;
 use App\Filament\Widgets\RecentHazardsWidget;
 use App\Filament\Widgets\RecentHazardsTable;
+use App\Filament\Widgets\AdvancedSafetyInsightsWidget;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -45,6 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
+                AdvancedSafetyInsightsWidget::class,
                 BirdEntriesStatsWidget::class,
                 HazardReportsOverviewWidget::class,
                 RiskAssessmentChartWidget::class,
