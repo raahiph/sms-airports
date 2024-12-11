@@ -13,10 +13,22 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUserManagementAccess;
+use App\Models\Airport;
 
 class UserResource extends Resource
 {
     use HasUserManagementAccess;
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        if (!auth()->user()->hasRole('Super Admin')) {
+            $query->where('airport_id', auth()->user()->airport_id);
+        }
+        
+        return $query;
+    }
     
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-o-users';
@@ -51,15 +63,17 @@ class UserResource extends Resource
                             ->maxLength(255),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Employment Details')
+                    Forms\Components\Section::make('Employment Details')
                     ->schema([
+                        Forms\Components\Select::make('airport_id')
+                            ->label('Airport')
+                            ->options(Airport::pluck('name', 'id'))
+                            ->required()
+                            ->searchable(),
                         Forms\Components\TextInput::make('designation')
                             ->required()
                             ->maxLength(255),
                         Forms\Components\TextInput::make('department')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('airport')
                             ->required()
                             ->maxLength(255),
                         Forms\Components\TextInput::make('contact_number')

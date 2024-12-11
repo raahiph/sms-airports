@@ -17,6 +17,17 @@ class RoleResource extends Resource
 {
     use HasUserManagementAccess;
 
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        if (!auth()->user()->hasRole('Super Admin')) {
+            $query->where('airport_id', auth()->user()->airport_id);
+        }
+        
+        return $query;
+    }
+
     protected static ?string $model = Role::class;
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
     protected static ?string $navigationLabel = 'Roles & Permissions';

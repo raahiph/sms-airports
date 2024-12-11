@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\CalculatesRiskRating;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\BelongsToAirport;
 
 class HazardReport extends Model
 {
     use HasFactory;
     use CalculatesRiskRating;
+    use BelongsToAirport;
 
     protected $fillable = [
         'reporter_name',

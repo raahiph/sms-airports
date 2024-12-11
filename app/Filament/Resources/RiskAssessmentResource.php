@@ -11,9 +11,21 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use App\Services\ClaudeAssessmentService;
 use App\Traits\GeneratesAiAssessment;
+use Illuminate\Database\Eloquent\Builder;
 
 class RiskAssessmentResource extends Resource
 {
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        if (!auth()->user()->hasRole('Super Admin')) {
+            $query->where('airport_id', auth()->user()->airport_id);
+        }
+        
+        return $query;
+    }
+
     protected static ?string $model = RiskAssessment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';

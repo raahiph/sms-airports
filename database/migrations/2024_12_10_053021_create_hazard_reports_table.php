@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('reporter_name');
             $table->string('reporter_mobile');
             $table->string('reporter_email');
-            $table->string('organization');
+            // $table->string('organization');
             
             // Hazard Details
             $table->date('hazard_date');

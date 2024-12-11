@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\BelongsToAirport;
 
 class Occurrence extends Model
 {
     use HasFactory, SoftDeletes;
+    use BelongsToAirport;
 
     protected $fillable = [
         'reporter_name',

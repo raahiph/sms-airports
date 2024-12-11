@@ -20,7 +20,7 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'designation',
         'department',
-        'airport',
+        'airport_id',
         'contact_number',
     ];
 

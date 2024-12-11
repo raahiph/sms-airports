@@ -15,8 +15,20 @@ use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
 
+
 class BirdEntryResource extends Resource
 {
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        if (!auth()->user()->hasRole('Super Admin')) {
+            $query->where('airport_id', auth()->user()->airport_id);
+        }
+        
+        return $query;
+    }
+
     protected static ?string $model = BirdEntry::class;
     protected static ?string $navigationIcon = 'heroicon-o-exclamation-triangle';
     protected static ?string $navigationGroup = 'Wildlife Management';

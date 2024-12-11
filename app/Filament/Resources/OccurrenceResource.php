@@ -9,9 +9,21 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class OccurrenceResource extends Resource
 {
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        if (!auth()->user()->hasRole('Super Admin')) {
+            $query->where('airport_id', auth()->user()->airport_id);
+        }
+        
+        return $query;
+    }
+
     protected static ?string $model = Occurrence::class;
     protected static ?string $navigationIcon = 'heroicon-o-exclamation-triangle';
     protected static ?string $navigationGroup = 'Safety Management';

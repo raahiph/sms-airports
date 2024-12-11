@@ -23,6 +23,7 @@ use App\Filament\Widgets\RiskAssessmentChartWidget;
 use App\Filament\Widgets\RecentHazardsWidget;
 use App\Filament\Widgets\RecentHazardsTable;
 use App\Filament\Widgets\AdvancedSafetyInsightsWidget;
+use App\Http\Middleware\EnsureValidAirport;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -45,7 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path(''), for: '')
             ->widgets([
                 Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                // Widgets\FilamentInfoWidget::class,
                 AdvancedSafetyInsightsWidget::class,
                 BirdEntriesStatsWidget::class,
                 HazardReportsOverviewWidget::class,
@@ -64,6 +65,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                EnsureValidAirport::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

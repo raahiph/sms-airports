@@ -23,8 +23,20 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\Filter\DateFilter;
 
 
+
 class HazardReportResource extends Resource
 {
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        if (!auth()->user()->hasRole('Super Admin')) {
+            $query->where('airport_id', auth()->user()->airport_id);
+        }
+        
+        return $query;
+    }
+
     protected static ?string $model = HazardReport::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-exclamation-triangle';
@@ -61,7 +73,7 @@ class HazardReportResource extends Resource
                         ->default(fn () => auth()->user()->email)
                         ->required()
                         ->disabled(),
-                    Forms\Components\TextInput::make('organization')
+                    Forms\Components\TextInput::make('airport')
                         ->label('Airport')
                         ->default(fn () => auth()->user()->airport)
                         ->required()

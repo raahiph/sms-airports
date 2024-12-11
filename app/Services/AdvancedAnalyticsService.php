@@ -42,7 +42,7 @@ class AdvancedAnalyticsService
      */
     protected function analyzeOccurrences(): array
     {
-        $occurrences = Occurrence::with(['attachments'])->get();
+        $occurrences = Occurrence::get();
         
         try {
             $response = Http::post("{$this->pythonApiEndpoint}/analyze-occurrences", [
@@ -285,7 +285,6 @@ class AdvancedAnalyticsService
     protected function getBirdStrikeData(): array
     {
         return Occurrence::where('occurrence_type', 'bird_strike')
-            ->with(['attachments'])
             ->get()
             ->map(function($occurrence) {
                 return [
