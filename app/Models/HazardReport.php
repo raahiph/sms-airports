@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\CalculatesRiskRating;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class HazardReport extends Model
 {
@@ -27,6 +28,14 @@ class HazardReport extends Model
         'corrective_actions',
         'attachments'
     ];
+
+     /**
+     * Get the risk assessments for the hazard report.
+     */
+    public function riskAssessments(): HasMany
+    {
+        return $this->hasMany(RiskAssessment::class);
+    }
 
     protected static function boot()
     {

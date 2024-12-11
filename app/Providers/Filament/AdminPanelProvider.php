@@ -17,6 +17,11 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Widgets\BirdEntriesStatsWidget;
+use App\Filament\Widgets\HazardReportsOverviewWidget;
+use App\Filament\Widgets\RiskAssessmentChartWidget;
+use App\Filament\Widgets\RecentHazardsWidget;
+use App\Filament\Widgets\RecentHazardsTable;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -35,10 +40,17 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverWidgets(in: app_path(''), for: '')
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
+                BirdEntriesStatsWidget::class,
+                HazardReportsOverviewWidget::class,
+                RiskAssessmentChartWidget::class,
+                RecentHazardsTable::class,
+                // RecentHazardsWidget::class,
+                
             ])
             ->middleware([
                 EncryptCookies::class,
