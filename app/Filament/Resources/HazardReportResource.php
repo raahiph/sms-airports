@@ -17,6 +17,11 @@ use Filament\Support\Exceptions\Halt;
 use Illuminate\Support\Facades\Log;
 use App\Services\ClaudeAssessmentService;
 use App\Traits\GeneratesAiAssessment;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Filters\Filter\DateFilter;
+
 
 class HazardReportResource extends Resource
 {
